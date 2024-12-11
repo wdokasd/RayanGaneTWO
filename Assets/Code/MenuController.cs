@@ -7,7 +7,7 @@ public class MenuController : MonoBehaviour
     public void PlayGame()
     {
         // Загрузка основного игрового уровня
-        SceneManager.LoadScene("Level1"); // Укажите имя вашей игровой сцены
+        SceneManager.LoadScene(3); // Укажите имя вашей игровой сцены
     }
 
     public void QuitGame()
