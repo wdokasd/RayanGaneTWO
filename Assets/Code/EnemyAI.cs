@@ -3,42 +3,81 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    public Transform Player;
-    public Transform Rayan; // Ссылка на объект игрока
-    private NavMeshAgent agent; // Компонент NavMeshAgent
+    public Transform player; // Ссылка на игрока
+    public Transform targetRayan; // Ссылка на объект с тегом "Rayan"
+    public float visionRange = 10f; // Радиус "зрения" врага
+    public float attackDistance = 2f; // Дистанция остановки возле цели
+    public float chaseDuration = 30f; // Длительность преследования после выхода из зоны видимости
+
+    private NavMeshAgent agent;
+    private Transform currentTarget; // Текущая цель врага
+    private float chaseTimer = 0f; // Таймер преследования
+    private bool isChasing = false; // Флаг преследования
 
     void Start()
     {
-        // Ищем игрока по тегу
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        agent = GetComponent<NavMeshAgent>();
+        // Находим объект с тегом "Rayan" в сцене
         GameObject rayanObject = GameObject.FindGameObjectWithTag("Rayan");
         if (rayanObject != null)
         {
-            Rayan = rayanObject.transform;
+            targetRayan = rayanObject.transform;
         }
-
         else
         {
-            Player = playerObject.transform;
+            Debug.LogError("Объект с тегом 'Rayan' не найден!");
         }
-
-        agent = GetComponent<NavMeshAgent>();
-
     }
-
 
     void Update()
     {
-        if (Rayan != null)
+        if (PlayerInVision())
         {
-            // Устанавливаем цель для перемещения
-            agent.SetDestination(Rayan.position);
+            // Если игрок в поле зрения, запускаем преследование "Rayan"
+            if (targetRayan != null)
+            {
+                currentTarget = targetRayan;
+                isChasing = true;
+                chaseTimer = chaseDuration; // Сбрасываем таймер преследования
+            }
+        }
+        else if (isChasing)
+        {
+            // Уменьшаем таймер, если игрок вне зоны видимости
+            chaseTimer -= Time.deltaTime;
+            if (chaseTimer <= 0f)
+            {
+                isChasing = false;
+                currentTarget = null; // Прекращаем преследование
+            }
         }
 
-        else
+        if (currentTarget != null)
         {
-            agent.SetDestination(Player.position);
+            float distance = Vector3.Distance(transform.position, currentTarget.position);
+
+            if (distance > attackDistance)
+            {
+                agent.SetDestination(currentTarget.position);
+            }
+            else
+            {
+                agent.ResetPath(); // Останавливаемся возле цели
+            }
         }
-        
+    }
+
+    private bool PlayerInVision()
+    {
+        // Проверяем, находится ли игрок в зоне зрения врага
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        return distanceToPlayer <= visionRange;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        // Отображение зоны "зрения" для отладки
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, visionRange);
     }
 }
