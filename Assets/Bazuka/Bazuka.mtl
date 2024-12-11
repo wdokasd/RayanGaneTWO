@@ -1,0 +1,16 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 20.02.2014 18:58:07
+
+newmtl Tex_0130_0_dds
+	Ns 10.000000
+	Ni 1.500000
+	d 1.000000
+	Tr 0.000000
+	Tf 1.000000 1.000000 1.000000 
+	illum 2
+	Ka 0.588000 0.588000 0.588000
+	Kd 0.588000 0.588000 0.588000
+	Ks 0.000000 0.000000 0.000000
+	Ke 0.000000 0.000000 0.000000
+	map_Ka D:\Games\Front Mission Evolved\_Ripper\17.02.2014_18.05.22\Frames\Frame0003\Tex_0130_0.dds
+	map_Kd D:\Games\Front Mission Evolved\_Ripper\17.02.2014_18.05.22\Frames\Frame0003\Tex_0130_0.dds
