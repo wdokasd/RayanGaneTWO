@@ -1,23 +1,29 @@
 using UnityEngine;
 
-
 public class Bullet : MonoBehaviour
 {
-    
+    public int damage = 10; // Урон от пули
 
-    // Этот метод вызывается, когда пуля входит в триггер (столкновение с врагом)
     private void OnCollisionEnter(Collision collision)
     {
         // Проверяем, является ли объект врагом
         if (collision.gameObject.CompareTag("Enemy"))
         {
+            // Получаем компонент здоровья врага
+            EnemyHealth enemyHealth = collision.gameObject.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
+            {
+                // Наносим урон врагу
+                enemyHealth.TakeDamage(damage);
+            }
 
-            // Уничтожаем пулю после столкноения
+            // Уничтожаем пулю после столкновения
             Destroy(gameObject);
-            Destroy(collision.gameObject);
-
         }
-
-
+        else
+        {
+            // Уничтожаем пулю при столкновении с любыми другими объектами
+            Destroy(gameObject);
+        }
     }
 }
