@@ -8,6 +8,7 @@ public class EnemyAI : MonoBehaviour
     public float visionRange = 10f; // Радиус "зрения" врага
     public float attackDistance = 2f; // Дистанция остановки возле цели
     public float chaseDuration = 30f; // Длительность преследования после выхода из зоны видимости
+    public float alertRange = 30f; // Радиус, в котором враги будут предупреждены
 
     private NavMeshAgent agent;
     private Transform currentTarget; // Текущая цель врага
@@ -33,12 +34,13 @@ public class EnemyAI : MonoBehaviour
     {
         if (PlayerInVision())
         {
-            // Если игрок в поле зрения, запускаем преследование "Rayan"
+            // Если игрок в поле зрения, запускаем преследование "Rayan" и предупреждаем других врагов
             if (targetRayan != null)
             {
                 currentTarget = targetRayan;
                 isChasing = true;
                 chaseTimer = chaseDuration; // Сбрасываем таймер преследования
+                AlertNearbyEnemies(); // Предупреждаем ближайших врагов
             }
         }
         else if (isChasing)
@@ -74,10 +76,38 @@ public class EnemyAI : MonoBehaviour
         return distanceToPlayer <= visionRange;
     }
 
+    private void AlertNearbyEnemies()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, alertRange);
+
+        foreach (Collider collider in hitColliders)
+        {
+            if (collider.CompareTag("Enemy") && collider.gameObject != gameObject)
+            {
+                EnemyAI enemyAI = collider.GetComponent<EnemyAI>();
+                if (enemyAI != null)
+                {
+                    enemyAI.Alert(targetRayan);
+                }
+            }
+        }
+    }
+
+    public void Alert(Transform target)
+    {
+        currentTarget = target;
+        isChasing = true;
+        chaseTimer = chaseDuration; // Сбрасываем таймер преследования
+    }
+
     void OnDrawGizmosSelected()
     {
         // Отображение зоны "зрения" для отладки
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, visionRange);
+
+        // Отображение радиуса оповещения
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, alertRange);
     }
 }
