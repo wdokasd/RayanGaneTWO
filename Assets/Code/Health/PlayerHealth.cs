@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro; // Подключаем TextMeshPro
 using UnityEngine.SceneManagement; // Подключаем SceneManager
 
 public class PlayerHealth : MonoBehaviour
@@ -7,46 +7,37 @@ public class PlayerHealth : MonoBehaviour
     public int maxHealth = 100; // Максимальное здоровье
     public int currentHealth;  // Текущее здоровье
 
-    public Scrollbar healthScrollbar; // Ссылка на Scrollbar
+    public TextMeshProUGUI healthTextUI; // Ссылка на TMP Text UI для отображения здоровья
 
     void Start()
     {
         // Устанавливаем текущее здоровье на максимум при старте
         currentHealth = maxHealth;
 
-        // Настраиваем Scrollbar
-        if (healthScrollbar != null)
-        {
-            healthScrollbar.size = 1f; // Полное здоровье
-        }
+        // Обновляем текст здоровья
+        UpdateHealthText();
     }
 
     void Update()
     {
-        if (healthScrollbar != null)
+        // Убедимся, что здоровье не опускается ниже нуля
+        if (currentHealth <= 0)
         {
-            // Обновляем текущее здоровье на основе значения Scrollbar
-            currentHealth = Mathf.RoundToInt(maxHealth * healthScrollbar.size);
-
-            // Убедимся, что здоровье не опускается ниже нуля
-            if (currentHealth <= 0)
-            {
-                currentHealth = 0;
-                Die();
-            }
+            currentHealth = 0;
+            Die();
         }
     }
 
     public void TakeDamage(int damage)
     {
-        // Если Получен Урон вычетаем ХП
+        // Если Получен Урон, вычитаем ХП
         currentHealth -= damage;
         if (currentHealth < 0)
         {
             currentHealth = 0;
         }
-        // Обновляем Scrollbar
-        UpdateScrollbar();
+        // Обновляем текст здоровья
+        UpdateHealthText();
     }
 
     public void Heal(int healAmount)
@@ -56,15 +47,15 @@ public class PlayerHealth : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
-
-        UpdateScrollbar();
+        // Обновляем текст здоровья
+        UpdateHealthText();
     }
 
-    private void UpdateScrollbar()
+    private void UpdateHealthText()
     {
-        if (healthScrollbar != null)
+        if (healthTextUI != null)
         {
-            healthScrollbar.size = (float)currentHealth / maxHealth;
+            healthTextUI.text = $"{currentHealth}/{maxHealth}"; // Отображаем здоровье в формате "Health: 80/100"
         }
     }
 
