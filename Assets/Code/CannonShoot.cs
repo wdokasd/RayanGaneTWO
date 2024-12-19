@@ -10,13 +10,16 @@ public class CannonShoot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Проверка нажатия левой кнопки мыши (0 — левая кнопка)
-        if (Input.GetMouseButtonDown(0))
-        {
-            Shoot();
-
-        }
+        
     }
+
+
+    public void fire()
+    {
+        Shoot();
+    }
+
+
 
     void Shoot()
     {

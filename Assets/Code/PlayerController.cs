@@ -1,78 +1,104 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;          // �������� �������� ������
-    public float jumpForce = 5f;         // ���� ������
-    public float mouseSensitivity = 100f; // ���������������� ���� ��� �������� ������
-    public Transform cameraTransform;    // ������ �� ������ (���������� ����� ���������)
-    public LayerMask groundLayer;        // ���� ����� ��� ��������
+    public float moveSpeed = 5f;          // Скорость движения игрока
+    public float jumpForce = 5f;         // Сила прыжка
+    public float lookSensitivity = 100f; // Чувствительность для вращения камеры
+    public Transform cameraTransform;    // Ссылка на камеру игрока
+    public LayerMask groundLayer;        // Слой для проверки земли
 
-    private Rigidbody rb;                // Rigidbody ������
-    private float xRotation = 0f;        // ������� ���� �������� ������ �� ��� X
-    private bool isGrounded = false;     // ���� ��� ��������, ��������� �� ����� �� �����
+    public Joystick movementJoystick;    // Джойстик для движения
+
+    private Rigidbody rb;                // Rigidbody игрока
+    private float xRotation = 0f;        // Поворот камеры по оси X
+    private bool isGrounded = false;     // Находится ли игрок на земле
+    private Vector2 lastMousePosition;   // Последняя позиция мыши
+    private bool isDragging = false;     // Перетаскивание мышью
+    private bool isJoystickDragging = false; // Флаг для предотвращения поворота камеры при движении джойстиком
 
     void Start()
     {
-        // �������������� Rigidbody
         rb = GetComponent<Rigidbody>();
 
-        // ��������� ������ ����
-        Cursor.lockState = CursorLockMode.Locked;
+        // Скрываем курсор мыши
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     void Update()
     {
-        MovePlayer();       // ���������� �������������
-        RotateCamera();     // ���������� �������
+        MovePlayer();       // Движение игрока
+        RotateCamera();     // Вращение камеры через мышь
 
-        // ������ ��� ������� �������
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetMouseButtonDown(0))
         {
-            Jump();
+            if (!IsPointerOverUIElement())
+            {
+                isDragging = true;
+                lastMousePosition = Input.mousePosition;
+            }
         }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            isDragging = false;
+        }
+
+        isJoystickDragging = Mathf.Abs(movementJoystick.Horizontal) > 0.1f || Mathf.Abs(movementJoystick.Vertical) > 0.1f;
     }
 
     void MovePlayer()
     {
-        // �������� ���� � ���������� (WASD/�������)
-        float horizontal = Input.GetAxis("Horizontal"); // �����/������ (A/D)
-        float vertical = Input.GetAxis("Vertical");     // ������/����� (W/S)
+        // Получаем значения осей от джойстика движения
+        float horizontal = movementJoystick.Horizontal;
+        float vertical = movementJoystick.Vertical;
 
-        // ������������ ����������� ��������
+        // Направление движения (исправлено инвертирование осей)
         Vector3 moveDirection = transform.right * horizontal + transform.forward * vertical;
 
-        // ������� ������ (������ �� ���� X � Z, ��������� ���������� ������� ����� Rigidbody)
+        // Применяем движение
         Vector3 velocity = new Vector3(moveDirection.x * moveSpeed, rb.linearVelocity.y, moveDirection.z * moveSpeed);
         rb.linearVelocity = velocity;
     }
 
     void RotateCamera()
     {
-        // �������� �������� ����
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        if (isDragging && !isJoystickDragging)
+        {
+            Vector2 currentMousePosition = Input.mousePosition;
+            Vector2 delta = currentMousePosition - lastMousePosition;
+            lastMousePosition = currentMousePosition;
 
-        // ������������ ������ �����/���� (������������ ���� ������)
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // ������������ ���� �������
+            // Поворот камеры вверх/вниз
+            xRotation -= delta.y * lookSensitivity * Time.deltaTime;
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        // ��������� �������� � ������
-        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        // ������������ ������ �����/������
-        transform.Rotate(Vector3.up * mouseX);
+            // Поворот игрока влево/вправо
+            transform.Rotate(Vector3.up * delta.x * lookSensitivity * Time.deltaTime);
+        }
     }
 
-    void Jump()
+    public void Jump()
     {
-        // ��������� ������ �� ��� Y
-        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        if (isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
     }
 
     private void FixedUpdate()
     {
-        // ���������, ��������� �� ����� �� �����
+        // Проверяем, находится ли игрок на земле
         isGrounded = Physics.CheckSphere(transform.position, 0.1f, groundLayer);
+    }
+
+    private bool IsPointerOverUIElement()
+    {
+        // Проверка, находится ли курсор над UI элементом (джойстиком)
+        return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
     }
 }
