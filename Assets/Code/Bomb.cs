@@ -25,26 +25,30 @@ public class Bomb : MonoBehaviour
     void Update()
     {
         // Проверка нажатия левой кнопки мыши (0 — левая кнопка)
-        if (Input.GetMouseButtonDown(1))
+        
+    }
+
+
+    public void FireBomb()
+    {
+        // Проверяем есть ли Боезапас
+        if (Ammo > 0)
         {
-            // Проверяем есть ли Боезапас
-            if (Ammo > 0)
-            {
-                // Разрешаем Огонь
-                fire = true;
-                // Вызываем Выстрел
-                Shoot();
-            }
+            // Разрешаем Огонь
+            fire = true;
+            // Вызываем Выстрел
+            Shoot();
+        }
 
 
-            // Если нет Боеприпасов
-            else
-            {
-                // Запрешаем Огонь
-                fire = false;
-            }
+        // Если нет Боеприпасов
+        else
+        {
+            // Запрешаем Огонь
+            fire = false;
         }
     }
+
 
     void Shoot()
     {
