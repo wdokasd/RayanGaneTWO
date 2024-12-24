@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 lastMousePosition;   // Последняя позиция мыши
     private bool isDragging = false;     // Перетаскивание мышью
     private bool isJoystickDragging = false; // Флаг для предотвращения поворота камеры при движении джойстиком
+    private bool isFirstInteraction = true; // Флаг для первого взаимодействия
 
     void Start()
     {
@@ -38,6 +39,7 @@ public class PlayerController : MonoBehaviour
             {
                 isDragging = true;
                 lastMousePosition = Input.mousePosition;
+                isFirstInteraction = false; // Убираем флаг после первого взаимодействия
             }
         }
 
@@ -69,16 +71,26 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 currentMousePosition = Input.mousePosition;
             Vector2 delta = currentMousePosition - lastMousePosition;
-            lastMousePosition = currentMousePosition;
 
-            // Поворот камеры вверх/вниз
-            xRotation -= delta.y * lookSensitivity * Time.deltaTime;
-            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+            // Проверяем скачки, игнорируя слишком большие изменения
+            if (!isFirstInteraction && delta.magnitude < Screen.width * 0.1f)
+            {
+                lastMousePosition = currentMousePosition;
 
-            cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+                // Поворот камеры вверх/вниз
+                xRotation -= delta.y * lookSensitivity * Time.deltaTime;
+                xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-            // Поворот игрока влево/вправо
-            transform.Rotate(Vector3.up * delta.x * lookSensitivity * Time.deltaTime);
+                cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+                // Поворот игрока влево/вправо
+                transform.Rotate(Vector3.up * delta.x * lookSensitivity * Time.deltaTime);
+            }
+            else
+            {
+                // Сбрасываем позицию, чтобы избежать скачка
+                lastMousePosition = currentMousePosition;
+            }
         }
     }
 

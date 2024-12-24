@@ -6,6 +6,7 @@ public class TimedVictoryZone : MonoBehaviour
 {
     public TextMeshProUGUI timerText; // Ссылка на TMP Text UI для отображения таймера
     public float timerDuration = 600f; // Длительность таймера в секундах (10 минут)
+    public int level;
 
     private float timer; // Текущий таймер
     private bool isTimerRunning = false; // Флаг, идет ли таймер
@@ -53,6 +54,6 @@ public class TimedVictoryZone : MonoBehaviour
     private void Victory()
     {
         Debug.Log("Игрок победил!");
-        SceneManager.LoadScene(3);
+        SceneManager.LoadScene(level);
     }
 }
