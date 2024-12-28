@@ -1,116 +1,95 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;          // Скорость движения игрока
-    public float jumpForce = 5f;         // Сила прыжка
-    public float lookSensitivity = 100f; // Чувствительность для вращения камеры
-    public Transform cameraTransform;    // Ссылка на камеру игрока
-    public LayerMask groundLayer;        // Слой для проверки земли
+    public FloatingJoystick movementJoystick; // Джойстик для движения
+    public float moveSpeed = 5f;              // Скорость движения
+    public float cameraSensitivity = 2f;     // Чувствительность камеры
 
-    public Joystick movementJoystick;    // Джойстик для движения
-
-    private Rigidbody rb;                // Rigidbody игрока
-    private float xRotation = 0f;        // Поворот камеры по оси X
-    private bool isGrounded = false;     // Находится ли игрок на земле
-    private Vector2 lastMousePosition;   // Последняя позиция мыши
-    private bool isDragging = false;     // Перетаскивание мышью
-    private bool isJoystickDragging = false; // Флаг для предотвращения поворота камеры при движении джойстиком
-    private bool isFirstInteraction = true; // Флаг для первого взаимодействия
+    private Rigidbody rb;                    // Rigidbody игрока
+    private Vector2 lookInput;               // Ввод камеры
+    private Transform cameraTransform;       // Камера игрока
+    private bool isTouchingScreen = false;   // Флаг для проверки нажатия на экран
+    private float xRotation = 0f;            // Для ограничения вертикального поворота камеры
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-
-        // Скрываем курсор мыши
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        cameraTransform = Camera.main.transform;
+        xRotation = cameraTransform.localEulerAngles.x; // Начальный угол камеры
     }
 
     void Update()
     {
-        MovePlayer();       // Движение игрока
-        RotateCamera();     // Вращение камеры через мышь
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (!IsPointerOverUIElement())
-            {
-                isDragging = true;
-                lastMousePosition = Input.mousePosition;
-                isFirstInteraction = false; // Убираем флаг после первого взаимодействия
-            }
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            isDragging = false;
-        }
-
-        isJoystickDragging = Mathf.Abs(movementJoystick.Horizontal) > 0.1f || Mathf.Abs(movementJoystick.Vertical) > 0.1f;
+        MovePlayer();        // Движение игрока
+        HandleCameraInput(); // Обработка ввода для камеры
+        RotateCamera();      // Вращение камеры
     }
 
     void MovePlayer()
     {
-        // Получаем значения осей от джойстика движения
+        // Получаем входные данные джойстика
         float horizontal = movementJoystick.Horizontal;
         float vertical = movementJoystick.Vertical;
 
-        // Направление движения (исправлено инвертирование осей)
+        // Вычисляем направление движения
         Vector3 moveDirection = transform.right * horizontal + transform.forward * vertical;
-
-        // Применяем движение
         Vector3 velocity = new Vector3(moveDirection.x * moveSpeed, rb.linearVelocity.y, moveDirection.z * moveSpeed);
+
+        // Применяем движение к Rigidbody
         rb.linearVelocity = velocity;
+    }
+
+    void HandleCameraInput()
+    {
+        // Проверяем, нажата ли правая часть экрана
+        if (Input.GetMouseButtonDown(0)) // Для ПК (левая кнопка мыши)
+        {
+            Vector3 mousePosition = Input.mousePosition;
+            if (mousePosition.x > Screen.width / 2) // Проверяем, что нажата правая половина экрана
+            {
+                isTouchingScreen = true;
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0)) // Отпускаем нажатие
+        {
+            isTouchingScreen = false;
+        }
+
+        // Для мобильных устройств
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            if (touch.phase == TouchPhase.Began && touch.position.x > Screen.width / 2)
+            {
+                isTouchingScreen = true;
+            }
+
+            if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+            {
+                isTouchingScreen = false;
+            }
+        }
     }
 
     void RotateCamera()
     {
-        if (isDragging && !isJoystickDragging)
+        if (isTouchingScreen) // Поворачиваем камеру только при нажатии
         {
-            Vector2 currentMousePosition = Input.mousePosition;
-            Vector2 delta = currentMousePosition - lastMousePosition;
+            // Ввод камеры через экран
+            lookInput.x = Input.GetAxis("Mouse X") * cameraSensitivity;
+            lookInput.y = Input.GetAxis("Mouse Y") * cameraSensitivity;
 
-            // Проверяем скачки, игнорируя слишком большие изменения
-            if (!isFirstInteraction && delta.magnitude < Screen.width * 0.1f)
-            {
-                lastMousePosition = currentMousePosition;
+            // Поворот по горизонтали (Y)
+            transform.Rotate(Vector3.up * lookInput.x);
 
-                // Поворот камеры вверх/вниз
-                xRotation -= delta.y * lookSensitivity * Time.deltaTime;
-                xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+            // Поворот по вертикали (X)
+            xRotation -= lookInput.y;
+            xRotation = Mathf.Clamp(xRotation, -80f, 80f); // Ограничение вертикального угла
 
-                cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-                // Поворот игрока влево/вправо
-                transform.Rotate(Vector3.up * delta.x * lookSensitivity * Time.deltaTime);
-            }
-            else
-            {
-                // Сбрасываем позицию, чтобы избежать скачка
-                lastMousePosition = currentMousePosition;
-            }
+            // Применяем ограниченный угол к камере
+            cameraTransform.localEulerAngles = new Vector3(xRotation, 0f, 0f);
         }
-    }
-
-    public void Jump()
-    {
-        if (isGrounded)
-        {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        // Проверяем, находится ли игрок на земле
-        isGrounded = Physics.CheckSphere(transform.position, 0.1f, groundLayer);
-    }
-
-    private bool IsPointerOverUIElement()
-    {
-        // Проверка, находится ли курсор над UI элементом (джойстиком)
-        return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
     }
 }
