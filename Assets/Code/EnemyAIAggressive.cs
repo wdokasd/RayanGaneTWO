@@ -12,7 +12,7 @@ public class EnemyAIAggressive : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
 
         // Ищем объект с тегом "Rayan"
-        GameObject rayanObject = GameObject.FindGameObjectWithTag("Rayan");
+        GameObject rayanObject = GameObject.FindGameObjectWithTag("RayanV2");
         if (rayanObject != null)
         {
             targetRayan = rayanObject.transform;
