@@ -73559,6 +73559,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelDuration: 600
+  level: 2
   timerText: {fileID: 2137957542}
 --- !u!4 &2092022802 stripped
 Transform:
@@ -75724,7 +75725,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1591723639046322005, guid: 078d399f6a3df454cb5553205083acae, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.23
+      value: 1.248
       objectReference: {fileID: 0}
     - target: {fileID: 1591723639046322005, guid: 078d399f6a3df454cb5553205083acae, type: 3}
       propertyPath: m_LocalPosition.z
@@ -75758,6 +75759,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -0.15
       objectReference: {fileID: 0}
+    - target: {fileID: 5376670967256372213, guid: 078d399f6a3df454cb5553205083acae, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 36b711818c4cdd64d90dcc1aa4155854, type: 2}
     - target: {fileID: 6911445086745872878, guid: 078d399f6a3df454cb5553205083acae, type: 3}
       propertyPath: player
       value: 
@@ -75771,7 +75776,8 @@ PrefabInstance:
       value: RayanV2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 6047495526081399394, guid: 078d399f6a3df454cb5553205083acae, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 078d399f6a3df454cb5553205083acae, type: 3}
