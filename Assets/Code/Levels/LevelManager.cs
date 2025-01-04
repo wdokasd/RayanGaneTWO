@@ -9,6 +9,7 @@ public class SimpleLevelManager : MonoBehaviour
         SceneManager.LoadScene(levelName);
     }
 
+
     // Загрузка следующего уровня
     public void LoadNextLevel()
     {
