@@ -6,6 +6,7 @@ public class Timer : MonoBehaviour
 {
     public float levelDuration = 60f; // Длительность уровня в секундах
     private float timer;
+    public int level;
 
     public TextMeshProUGUI timerText; // Ссылка на TextMeshProUGUI для отображения таймера
 
@@ -44,6 +45,6 @@ public class Timer : MonoBehaviour
     {
         // Получаем текущую сцену и загружаем следующую
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(level);
     }
 }

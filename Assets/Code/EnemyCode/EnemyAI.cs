@@ -19,15 +19,12 @@ public class EnemyAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         // Находим объект с тегом "Rayan" в сцене
-        GameObject rayanObject = GameObject.FindGameObjectWithTag("Rayan");
+        GameObject rayanObject = GameObject.FindGameObjectWithTag("RayanV2");
         if (rayanObject != null)
         {
             targetRayan = rayanObject.transform;
         }
-        else
-        {
-            Debug.LogError("Объект с тегом 'Rayan' не найден!");
-        }
+        
     }
 
     void Update()
