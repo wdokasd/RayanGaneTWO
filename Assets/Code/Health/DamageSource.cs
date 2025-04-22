@@ -2,31 +2,41 @@ using UnityEngine;
 
 public class DamageSource : MonoBehaviour
 {
-    public int damage = 10; // Урон, наносимый игроку
+    public int damage = 10;    // Урон, наносимый игроку и Райану
+
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Проверяем, столкнулись ли с игроком
-        if (collision.gameObject.CompareTag("Player"))
+        Debug.Log($"Collision with: {collision.gameObject.name}");
+
+        if (collision.gameObject.CompareTag("RayanV2"))
         {
-            // Получаем компонент PlayerHealth
-            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                // Наносим урон
-                playerHealth.TakeDamage(damage);
-                Debug.Log("АХТУНГ!!");
-            }
+            Debug.Log("Player hit!");
+            ApplyDamage(collision.gameObject);
         }
 
-        if (collision.gameObject.CompareTag("Rayan"))
+
+        // Проверяем, является ли объект игроком
+        if (collision.gameObject.CompareTag("Player"))
         {
-            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(damage);
-                Debug.Log("СПАСАЙ РАЙАНА");
-            }
+            Debug.Log("Player hit!");
+            ApplyDamage(collision.gameObject);
+        }
+    }
+
+    private void ApplyDamage(GameObject target)
+    {
+        // Пытаемся получить компонент PlayerHealth
+        PlayerHealth playerHealth = target.GetComponent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            // Наносим урон
+            playerHealth.TakeDamage(damage);
+            Debug.Log($"{target.name} получил урон: {damage}");
+        }
+        else
+        {
+            Debug.LogWarning($"У объекта {target.name} нет компонента PlayerHealth!");
         }
     }
 }

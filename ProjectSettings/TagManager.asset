@@ -9,6 +9,7 @@ TagManager:
   - Bullet
   - Enemy
   - Rayan
+  - RayanV2
   layers:
   - Default
   - TransparentFX

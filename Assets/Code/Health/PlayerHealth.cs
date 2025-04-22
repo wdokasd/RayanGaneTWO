@@ -1,21 +1,30 @@
 using UnityEngine;
 using TMPro; // Подключаем TextMeshPro
 using UnityEngine.SceneManagement; // Подключаем SceneManager
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth = 100; // Максимальное здоровье
-    public int currentHealth;  // Текущее здоровье
+    public int maxHealth = 100;         // Максимальное здоровье
+    public int currentHealth;          // Текущее здоровье
 
-    public TextMeshProUGUI healthTextUI; // Ссылка на TMP Text UI для отображения здоровья
+    public Image healthBar;            // Ссылка на Image для шкалы здоровья
 
     void Start()
     {
-        // Устанавливаем текущее здоровье на максимум при старте
-        currentHealth = maxHealth;
+        // Проверяем, привязан ли объект healthBar
+        if (healthBar == null)
+        {
+            healthBar = GameObject.Find("HealthBar")?.GetComponent<Image>();
+            if (healthBar == null)
+            {
+                Debug.LogError("HealthBar не найден в сцене! Убедитесь, что объект привязан.");
+            }
+        }
 
-        // Обновляем текст здоровья
-        UpdateHealthText();
+        // Устанавливаем текущее здоровье на максимум
+        currentHealth = maxHealth;
+        UpdateHealthBar(); // Обновляем шкалу здоровья
     }
 
     void Update()
@@ -30,32 +39,30 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        // Если Получен Урон, вычитаем ХП
+        // Уменьшаем здоровье
         currentHealth -= damage;
-        if (currentHealth < 0)
-        {
-            currentHealth = 0;
-        }
-        // Обновляем текст здоровья
-        UpdateHealthText();
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Ограничиваем значение
+        UpdateHealthBar(); // Обновляем шкалу здоровья
     }
 
     public void Heal(int healAmount)
     {
+        // Увеличиваем здоровье
         currentHealth += healAmount;
-        if (currentHealth > maxHealth)
-        {
-            currentHealth = maxHealth;
-        }
-        // Обновляем текст здоровья
-        UpdateHealthText();
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Ограничиваем значение
+        UpdateHealthBar(); // Обновляем шкалу здоровья
     }
 
-    private void UpdateHealthText()
+    void UpdateHealthBar()
     {
-        if (healthTextUI != null)
+        // Проверяем, чтобы healthBar не был null
+        if (healthBar != null)
         {
-            healthTextUI.text = $"{currentHealth}/{maxHealth}"; // Отображаем здоровье в формате "Health: 80/100"
+            healthBar.fillAmount = (float)currentHealth / maxHealth;
+        }
+        else
+        {
+            Debug.LogWarning("HealthBar не привязан. Обновление пропущено.");
         }
     }
 
